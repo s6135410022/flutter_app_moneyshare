@@ -16,6 +16,55 @@ class _HomeUIState extends State<HomeUI> {
   TextEditingController txPerson = TextEditingController();
   TextEditingController txTip = TextEditingController();
 
+  //เมธอด -> โค้ดแสดง Dialog เตือน โดย จะรับข้อความมาแสดงที่ Dialog
+  showWarningDialog(context, msg) {
+    //เรียกใช้งานฟักก์ชั้น ShowDialog
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Container(
+            color: Colors.deepPurple,
+            padding: EdgeInsets.only(
+              top: 10.0,
+              bottom: 10.0,
+            ),
+            child: Align(
+              alignment: Alignment.center,
+              child: Text(
+                'คำเตือน',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          content: Text(
+            msg,
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    'ตกลง',
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.deepPurple,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -157,14 +206,60 @@ class _HomeUIState extends State<HomeUI> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context){
-                        return MoneyshareUi();
+                  if (txMoney.text.length == 0) {
+                    showWarningDialog(
+                      context,
+                      'ป้อนเงินด้วยจ้า....',
+                    );
+                  } else if (txPerson.text.length == 0) {
+                    showWarningDialog(
+                      context,
+                      'ป้อนคนด้วยจ้า....',
+                    );
+                  }else{
+                    if (checkTip == true) {
+                      if(txTip.text.length == 0){
+                        showWarningDialog(context, 'ป้อนทิปด้วยจ้า....');
+                        return;
                       }
-                    ),
-                  );
+                    }
+
+                    //กรณีป้อนครบคำนวน
+
+                    //สร้างตัวแปร
+                    double money = 0;
+                    int person = 0;
+                    double tip = 0;
+                    double moneyShare = 0;
+                    //สูตรคำนวณ
+                    money = double.parse(txMoney.text);
+                    person = int.parse(txPerson.text);
+                    tip = checkTip == true ? double.parse(txTip.text): 0;
+                    moneyShare = (money + tip) / person ;
+
+                    //ส่งไปหน้า moneyShareUI
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context){
+                        return MoneyshareUi(
+                          money: money, 
+                          person: person, 
+                          tip: tip, 
+                          moneyShare: moneyShare
+                          );
+                      }
+                      ),
+                    );
+                  
+                  }
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context){
+                  //       return MoneyshareUi();
+                  //     }
+                  //   ),
+                  // );
                 },
                 child: Text('คำนวณ'),
                 style: ElevatedButton.styleFrom(
